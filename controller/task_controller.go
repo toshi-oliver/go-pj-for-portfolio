@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"go-rest-api/model"
-	"go-rest-api/usecase"
+	"go-pj-for-portfolio/model"
+	"go-pj-for-portfolio/usecase"
 	"net/http"
 	"strconv"
 

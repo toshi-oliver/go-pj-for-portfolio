@@ -1,11 +1,13 @@
 package router
 
 import (
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"go-pj-for-portfolio/controller"
+	"os"
 )
 
-func NewRouter(uc controller.IUserController, , tc controller.ITaskController) *echo.Echo {
+func NewRouter(uc controller.IUserController, tc controller.ITaskController) *echo.Echo {
 	e := echo.New()
 	e.POST("/signup", uc.SignUp)
 	e.POST("/login", uc.LogIn)

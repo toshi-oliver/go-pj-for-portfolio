@@ -2,7 +2,7 @@ package repository
 
 import (
 	"fmt"
-	"go-rest-api/model"
+	"go-pj-for-portfolio/model"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
