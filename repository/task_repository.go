@@ -3,13 +3,14 @@ package repository
 import (
 	"fmt"
 	"go-pj-for-portfolio/model"
+	"math"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type ITaskRepository interface {
-	GetAllTasks(tasks *[]model.Task, userId uint) error
+	GetTasksByPage(userId uint, taskPage uint) (model.TaskResponsePaginated, error)
 	GetTaskById(task *model.Task, userId uint, taskId uint) error
 	CreateTask(task *model.Task) error
 	UpdateTask(task *model.Task, userId uint, taskId uint) error
@@ -24,11 +25,55 @@ func NewTaskRepository(db *gorm.DB) ITaskRepository {
 	return &taskRepository{db}
 }
 
-func (tr *taskRepository) GetAllTasks(tasks *[]model.Task, userId uint) error {
-	if err := tr.db.Joins("User").Where("user_id=?", userId).Order("created_at").Find(tasks).Error; err != nil {
-		return err
+func (tr *taskRepository) GetTasksByPage(userId uint, taskPage uint) (model.TaskResponsePaginated, error) {
+	const countPerPage = 10
+
+	//ページングのために全件数を取得する
+	var total int64
+	if err := tr.db.Model(&model.Task{}).
+		Where("user_id = ?", userId).
+		Count(&total).Error; err != nil {
+		return model.TaskResponsePaginated{}, err
 	}
-	return nil
+
+	// 総件数から最後のページ数（lastPage）を計算（切り上げ）
+	lastPage := uint(math.Ceil(float64(total) / float64(countPerPage)))
+
+	offset := (taskPage - 1) * countPerPage
+	// ページ外のデータを取得しようとしていたらエラーにする
+	if int64(offset) >= total {
+		return model.TaskResponsePaginated{}, fmt.Errorf("ページ外のデータを取得しようとしています")
+	}
+	// 指定したページのデータを降順で取得する
+	var tasks []model.Task
+	if err := tr.db.
+		Where("user_id = ?", userId).
+		Order("created_at DESC").
+		Limit(countPerPage).
+		Offset(int(offset)).
+		Find(&tasks).Error; err != nil {
+		return model.TaskResponsePaginated{}, err
+	}
+
+	// model.Task から TaskResponse へ変換
+	resTasks := make([]model.TaskResponse, 0, len(tasks))
+	for _, task := range tasks {
+		resTasks = append(resTasks, model.TaskResponse{
+			ID:        task.ID,
+			Title:     task.Title,
+			CreatedAt: task.CreatedAt,
+			UpdatedAt: task.UpdatedAt,
+		})
+	}
+
+	response := model.TaskResponsePaginated{
+		Tasks:       resTasks,
+		CurrentPage: taskPage,
+		LastPage:    lastPage,
+		TotalCount:  total,
+	}
+
+	return response, nil
 }
 
 func (tr *taskRepository) GetTaskById(task *model.Task, userId uint, taskId uint) error {

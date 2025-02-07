@@ -17,3 +17,10 @@ type TaskResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type TaskResponsePaginated struct {
+	Tasks       []TaskResponse `json:"tasks"`
+	CurrentPage uint           `json:"currentPage"`
+	LastPage    uint           `json:"lastPage"`
+	TotalCount  int64          `json:"totalCount"`
+}
