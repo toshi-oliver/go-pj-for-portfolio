@@ -6,17 +6,15 @@ import (
 	"go-pj-for-portfolio/repository"
 	"go-pj-for-portfolio/router"
 	"go-pj-for-portfolio/usecase"
-	"go-pj-for-portfolio/validator"
 )
 
 func main() {
 	db := db.NewDB()
-	userValidator := validator.NewUserValidator()
 	userRepository := repository.NewUserRepository(db)
 	taskRepository := repository.NewTaskRepository(db)
-	userUsecase := usecase.NewUserUsecase(userRepository, userValidator)
+	userUsecase := usecase.NewUserUsecase(userRepository)
 	taskUsecase := usecase.NewTaskUsecase(taskRepository)
-	userController := controller.NewUserController(userUsecase)
+	userController := controller.NewUserController(*userUsecase)
 	taskController := controller.NewTaskController(*taskUsecase)
 
 	e := router.NewRouter(userController, taskController)

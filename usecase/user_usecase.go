@@ -11,22 +11,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type IUserUsecase interface {
-	SignUp(user model.User) (model.UserResponse, error)
-	Login(user model.User) (string, error)
-}
-
-type userUsecase struct {
+type UserUsecase struct {
 	ur repository.IUserRepository
-	uv validator.IUserValidator
 }
 
-func NewUserUsecase(ur repository.IUserRepository, uv validator.IUserValidator) IUserUsecase {
-	return &userUsecase{ur, uv}
+func NewUserUsecase(ur repository.IUserRepository) *UserUsecase {
+	return &UserUsecase{ur}
 }
 
-func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
-	if err := uu.uv.UserValidate(user); err != nil {
+func (uu *UserUsecase) SignUp(user model.User) (model.UserResponse, error) {
+	if err := validator.UserValidate(user); err != nil {
 		return model.UserResponse{}, err
 	}
 
@@ -48,8 +42,8 @@ func (uu *userUsecase) SignUp(user model.User) (model.UserResponse, error) {
 	return resUser, nil
 }
 
-func (uu *userUsecase) Login(user model.User) (string, error) {
-	if err := uu.uv.UserValidate(user); err != nil {
+func (uu *UserUsecase) Login(user model.User) (string, error) {
+	if err := validator.UserValidate(user); err != nil {
 		return "", err
 	}
 
