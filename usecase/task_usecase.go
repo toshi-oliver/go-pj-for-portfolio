@@ -15,7 +15,6 @@ func NewTaskUsecase(tr repository.ITaskRepository) *TaskUsecase {
 }
 
 func (tu *TaskUsecase) GetTasksByPage(userId uint, taskPage uint) (model.TaskResponsePaginated, error) {
-	taskPage = uint(1)
 	response, err := tu.tr.GetTasksByPage(userId, taskPage)
 	if err != nil {
 		return model.TaskResponsePaginated{}, err

@@ -26,8 +26,8 @@ func (tc *TaskController) GetTasksByPage(c echo.Context) error {
 
 	page := 1
 	var err error
-	if c.QueryParam("taskPage") != "" {
-		page, err = strconv.Atoi(c.QueryParam("taskPage"))
+	if c.QueryParam("page") != "" {
+		page, err = strconv.Atoi(c.QueryParam("page"))
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, "不正なページが指定されました")
 		}
