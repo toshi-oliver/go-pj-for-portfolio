@@ -6,42 +6,23 @@ import (
 	"go-pj-for-portfolio/validator"
 )
 
-type ITaskUsecase interface {
-	GetAllTasks(userId uint) ([]model.TaskResponse, error)
-	GetTaskById(userId uint, taskId uint) (model.TaskResponse, error)
-	CreateTask(task model.Task) (model.TaskResponse, error)
-	UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error)
-	DeleteTask(userId uint, taskId uint) error
-}
-
-type taskUsecase struct {
+type TaskUsecase struct {
 	tr repository.ITaskRepository
-	tv validator.ITaskValidator
 }
 
-func NewTaskUsecase(tr repository.ITaskRepository, tv validator.ITaskValidator) ITaskUsecase {
-	return &taskUsecase{tr, tv}
+func NewTaskUsecase(tr repository.ITaskRepository) *TaskUsecase {
+	return &TaskUsecase{tr}
 }
 
-func (tu *taskUsecase) GetAllTasks(userId uint) ([]model.TaskResponse, error) {
-	tasks := []model.Task{}
-	if err := tu.tr.GetAllTasks(&tasks, userId); err != nil {
-		return nil, err
+func (tu *TaskUsecase) GetTasksByPage(userId uint, taskPage uint) (model.TaskResponsePaginated, error) {
+	response, err := tu.tr.GetTasksByPage(userId, taskPage)
+	if err != nil {
+		return model.TaskResponsePaginated{}, err
 	}
-	resTasks := []model.TaskResponse{}
-	for _, v := range tasks {
-		t := model.TaskResponse{
-			ID:        v.ID,
-			Title:     v.Title,
-			CreatedAt: v.CreatedAt,
-			UpdatedAt: v.UpdatedAt,
-		}
-		resTasks = append(resTasks, t)
-	}
-	return resTasks, nil
+	return response, nil
 }
 
-func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse, error) {
+func (tu *TaskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse, error) {
 	task := model.Task{}
 	if err := tu.tr.GetTaskById(&task, userId, taskId); err != nil {
 		return model.TaskResponse{}, err
@@ -55,8 +36,8 @@ func (tu *taskUsecase) GetTaskById(userId uint, taskId uint) (model.TaskResponse
 	return resTask, nil
 }
 
-func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
-	if err := tu.tv.TaskValidate(task); err != nil {
+func (tu *TaskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
+	if err := validator.TaskValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
 
@@ -72,8 +53,8 @@ func (tu *taskUsecase) CreateTask(task model.Task) (model.TaskResponse, error) {
 	return resTask, nil
 }
 
-func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
-	if err := tu.tv.TaskValidate(task); err != nil {
+func (tu *TaskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (model.TaskResponse, error) {
+	if err := validator.TaskValidate(task); err != nil {
 		return model.TaskResponse{}, err
 	}
 
@@ -89,7 +70,7 @@ func (tu *taskUsecase) UpdateTask(task model.Task, userId uint, taskId uint) (mo
 	return resTask, nil
 }
 
-func (tu *taskUsecase) DeleteTask(userId uint, taskId uint) error {
+func (tu *TaskUsecase) DeleteTask(userId uint, taskId uint) error {
 	if err := tu.tr.DeleteTask(userId, taskId); err != nil {
 		return err
 	}
