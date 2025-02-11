@@ -39,7 +39,7 @@ func NewRouter(uc controller.IUserController, tc *controller.TaskController) *ec
 	t.GET("/", tc.GetTasksByPage)
 	t.GET("/:taskId", tc.GetTaskById)
 	t.POST("", tc.CreateTask)
-	t.PUT("/:taskId", tc.UpdateTask)
+	// t.PUT("/:taskId", tc.UpdateTask)
 	t.DELETE("/:taskId", tc.DeleteTask)
 
 	return e
